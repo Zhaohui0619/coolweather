@@ -9,6 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -25,4 +26,23 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    //数据库操作 LitePal
+    implementation 'org.litepal.android:core:2.0.0'
+    //网络请求 OkHttp
+    implementation group:'com.squareup.okhttp3',name: 'okhttp', version: '3.10.0'
+    //解析 JSON gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    //加载和展示图片 Glide
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    //空间绑定注解 @BindView
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    //解决 64k 限制（方法数超过65535）
+    implementation 'com.android.support:multidex:1.0.3'
+    //解决编译冲突
+    androidTestCompile('com.android.support:support-annotations:26.1.0') {
+        force = true
+    }
+
 }
