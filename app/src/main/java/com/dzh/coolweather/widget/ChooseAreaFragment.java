@@ -1,4 +1,4 @@
-package com.dzh.coolweather;
+package com.dzh.coolweather.widget;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -15,6 +15,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dzh.coolweather.MainActivity;
+import com.dzh.coolweather.R;
+import com.dzh.coolweather.app.WeatherActivity;
 import com.dzh.coolweather.bean.City;
 import com.dzh.coolweather.bean.County;
 import com.dzh.coolweather.bean.Province;
@@ -94,11 +97,21 @@ public class ChooseAreaFragment extends Fragment {
                     selectedCity = cityList.get(i);
                     queryCounties();
                 } else if (currentSelectedLevel == LEVEL_COUNTY) {
-                    String weatherId = countyList.get(i).getWeatherId();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weatherId", weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    selectedCounty = countyList.get(i);
+                    String weatherId = selectedCounty.getWeatherId();
+                    //判断若碎片在 MainActivity 中，则将天气 Id 传到传到 WeatherActivity
+                    // 若碎片在 WeatherActivity 中，则关闭滑动菜单，并显示下拉刷新进度条，来获取更新后城市的天气信息
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weatherId", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if (getActivity() instanceof WeatherActivity){
+                        WeatherActivity weatherActivity = (WeatherActivity) getActivity();
+                        weatherActivity.area_drawerLayout.closeDrawers();
+                        weatherActivity.refreshLayout.setRefreshing(true);
+                        weatherActivity.requestWeather(weatherId);
+                    }
                 }
             }
         });

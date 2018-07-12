@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.dzh.coolweather.app.WeatherActivity;
+
 public class MainActivity extends AppCompatActivity {
 
 

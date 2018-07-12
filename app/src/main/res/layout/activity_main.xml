@@ -11,6 +11,6 @@
         android:id="@+id/fragment_choose_area"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.dzh.coolweather.ChooseAreaFragment"/>
+        android:name="com.dzh.coolweather.widget.ChooseAreaFragment"/>
 
 </FrameLayout>

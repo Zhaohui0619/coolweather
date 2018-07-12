@@ -1,13 +1,17 @@
-package com.dzh.coolweather;
+package com.dzh.coolweather.app;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -15,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.dzh.coolweather.R;
 import com.dzh.coolweather.gson.Forecast;
 import com.dzh.coolweather.gson.Weather;
 import com.dzh.coolweather.util.HttpUtil;
@@ -66,11 +71,28 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.iv_bing_image)
     ImageView bingImage_iv;
 
+//    @BindView(R.id.srl_weather)
+//    SwipeRefreshLayout refreshLayout;
+
+    public SwipeRefreshLayout refreshLayout;
+
+//    @BindView(R.id.dl_area)
+//    DrawerLayout area_layout;
+    public DrawerLayout area_drawerLayout;
+
+    @BindView(R.id.btn_navigation)
+    Button navigation_btn;
+
+    private String mWeatherId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
+
+        area_drawerLayout = findViewById(R.id.dl_area);
+        refreshLayout = findViewById(R.id.srl_weather);
 
         //Android 5.0 以上的系统支持将背景图和状态栏融入到一起
         if (Build.VERSION.SDK_INT >= 21){
@@ -80,19 +102,29 @@ public class WeatherActivity extends AppCompatActivity {
             //将状态栏设置成透明色
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-
+        //手动刷新天气信息
+        refreshLayout.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherContent = preferences.getString("weather",null);
         if (weatherContent!=null){
             //若有本地缓存数据则直接进行处理
             Weather weather = Utility.handleWeatherResponse(weatherContent);
+            mWeatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         }else {
             //若无本地缓存数据则到服务器获取天气数据并处理
             String weatherId = getIntent().getStringExtra("weatherId");
+            mWeatherId = weatherId;
             weather_sv.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(mWeatherId);
+            }
+        });
 
         String bingImage = preferences.getString("bingImage",null);
         if (bingImage != null){
@@ -102,6 +134,13 @@ public class WeatherActivity extends AppCompatActivity {
             //若无本地图片缓存则到服务器获取图片并加载
             loadBingImage();
         }
+
+        navigation_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                area_drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
     }
 
     /**
@@ -119,6 +158,7 @@ public class WeatherActivity extends AppCompatActivity {
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT)
                                 .show();
+                        refreshLayout.setRefreshing(false);
                     }
                 });
 
@@ -142,6 +182,7 @@ public class WeatherActivity extends AppCompatActivity {
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT)
                                     .show();
                         }
+                        refreshLayout.setRefreshing(false);
                     }
                 });
 
